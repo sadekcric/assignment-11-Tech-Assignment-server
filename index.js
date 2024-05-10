@@ -29,7 +29,18 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    const productCollection = client.db("paginationPractice").collection("products");
+    const assignmentCollection = client.db("Tech-Assignment").collection("assignments");
+
+    app.post("/assignments", async (req, res) => {
+      const assignment = req.body;
+      const result = await assignmentCollection.insertOne(assignment);
+      res.send(result);
+    });
+
+    app.get("/assignments", async (req, res) => {
+      const result = await assignmentCollection.find().toArray();
+      res.send(result);
+    });
 
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
