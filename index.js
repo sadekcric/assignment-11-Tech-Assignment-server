@@ -35,6 +35,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     const assignmentCollection = client.db("Tech-Assignment").collection("assignments");
+    const submittedCollection = client.db("Tech-Assignment").collection("submitted");
 
     app.post("/assignments", async (req, res) => {
       const assignment = req.body;
@@ -105,10 +106,21 @@ async function run() {
       res.send(result);
     });
 
+    /* ======================= for Submitted  Collection =====================*/
+    app.post("/submitted", async (req, res) => {
+      const assignment = req.body;
+      const result = await submittedCollection.insertOne(assignment);
+      res.send(result);
+    });
+
+    app.get("/submitted", async (req, res) => {
+      const result = await submittedCollection.find().toArray();
+
+      res.send(result);
+    });
+
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
-    // Ensures that the client will close when you finish/error
-    // await client.close();
   }
 }
 run().catch(console.dir);
