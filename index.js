@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
 const cors = require("cors");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
 const port = process.env.PORT || 5000;
 
@@ -9,7 +9,12 @@ const port = process.env.PORT || 5000;
 app.use(express.json());
 app.use(
   cors({
-    origin: ["http://localhost:5174", "http://localhost:5173"],
+    origin: [
+      "http://localhost:5174",
+      "http://localhost:5173",
+      "https://tech-assignment-131b7.web.app",
+      "https://tech-assignment-131b7.firebaseapp.com",
+    ],
     credentials: true,
   })
 );
@@ -62,6 +67,22 @@ async function run() {
       const totalItems = await assignmentCollection.countDocuments(query);
 
       res.send({ totalItems });
+    });
+
+    app.get("/assignments/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await assignmentCollection.findOne(query);
+
+      res.send(result);
+    });
+
+    app.delete("/assignments/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await assignmentCollection.findOne(query);
+
+      res.send(result);
     });
 
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
