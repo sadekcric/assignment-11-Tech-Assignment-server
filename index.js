@@ -77,6 +77,26 @@ async function run() {
       res.send(result);
     });
 
+    app.put("/update/:id", async (req, res) => {
+      const id = req.params.id;
+      const item = res.body;
+      const query = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          description: item.description,
+          dueDate: item.dueDate,
+          level: item.level,
+          marks: item.marks,
+          thumbnail: item.thumbnail,
+          title: item.title,
+        },
+      };
+
+      const result = await assignmentCollection.updateOne(query, updateDoc, options);
+      res.send(result);
+    });
+
     app.delete("/delete/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
