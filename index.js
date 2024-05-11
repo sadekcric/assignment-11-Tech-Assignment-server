@@ -133,7 +133,7 @@ async function run() {
         },
       };
 
-      const result = await assignmentCollection.updateOne(query, updateDoc, options);
+      const result = await submittedCollection.updateOne(query, updateDoc, options);
       res.send(result);
     });
 
