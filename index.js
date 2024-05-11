@@ -40,9 +40,13 @@ async function run() {
     app.get("/assignments", async (req, res) => {
       const pages = parseInt(req.query.pages);
       const size = parseInt(req.query.size);
+      const difficultyLevel = req.query.level;
+
+      let query = {};
+      if (difficultyLevel) query = { level: difficultyLevel };
 
       const result = await assignmentCollection
-        .find()
+        .find(query)
         .skip(pages * size)
         .limit(size)
         .toArray();
@@ -50,7 +54,12 @@ async function run() {
     });
 
     app.get("/count", async (req, res) => {
-      const totalItems = await assignmentCollection.estimatedDocumentCount();
+      const difficultyLevel = req.query.level;
+
+      let query = {};
+      if (difficultyLevel) query = { level: difficultyLevel };
+
+      const totalItems = await assignmentCollection.countDocuments(query);
 
       res.send({ totalItems });
     });
