@@ -79,7 +79,7 @@ async function run() {
 
     app.put("/update/:id", async (req, res) => {
       const id = req.params.id;
-      const item = res.body;
+      const item = req.body;
       const query = { _id: new ObjectId(id) };
       const options = { upsert: true };
       const updateDoc = {
