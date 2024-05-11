@@ -113,9 +113,27 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/submitted", async (req, res) => {
-      const result = await submittedCollection.find().toArray();
+    app.get("/pending", async (req, res) => {
+      const query = { status: { $eq: "pending" } };
+      const result = await submittedCollection.find(query).toArray();
 
+      res.send(result);
+    });
+
+    app.put("/marked/:id", async (req, res) => {
+      const id = req.params.id;
+      const item = req.body;
+      const query = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          obtainedMarks: item.obtainedMarks,
+          feedBack: item.feedBack,
+          status: item.status,
+        },
+      };
+
+      const result = await assignmentCollection.updateOne(query, updateDoc, options);
       res.send(result);
     });
 
