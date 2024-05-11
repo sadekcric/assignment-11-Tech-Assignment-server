@@ -38,8 +38,21 @@ async function run() {
     });
 
     app.get("/assignments", async (req, res) => {
-      const result = await assignmentCollection.find().toArray();
+      const pages = parseInt(req.query.pages);
+      const size = parseInt(req.query.size);
+
+      const result = await assignmentCollection
+        .find()
+        .skip(pages * size)
+        .limit(size)
+        .toArray();
       res.send(result);
+    });
+
+    app.get("/count", async (req, res) => {
+      const totalItems = await assignmentCollection.estimatedDocumentCount();
+
+      res.send({ totalItems });
     });
 
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
