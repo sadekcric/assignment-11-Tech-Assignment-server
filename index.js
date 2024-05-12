@@ -120,6 +120,14 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/pending/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { "examinee.email": email };
+      const result = await submittedCollection.find(query).toArray();
+
+      res.send(result);
+    });
+
     app.put("/marked/:id", async (req, res) => {
       const id = req.params.id;
       const item = req.body;
