@@ -171,6 +171,7 @@ async function run() {
           obtainedMarks: item.obtainedMarks,
           feedBack: item.feedBack,
           status: item.status,
+          examiner: item.examiner,
         },
       };
 
