@@ -172,6 +172,7 @@ async function run() {
           feedBack: item.feedBack,
           status: item.status,
           examiner: item.examiner,
+          examinerName: item.examinerName,
         },
       };
 
