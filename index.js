@@ -1,6 +1,8 @@
 const express = require("express");
 const app = express();
 const cors = require("cors");
+const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
 const port = process.env.PORT || 5000;
@@ -18,6 +20,24 @@ app.use(
     credentials: true,
   })
 );
+app.use(cookieParser());
+
+const verifyUser = (req, res, next) => {
+  const token = req?.cookies?.token;
+
+  if (!token) {
+    return res.status(401).send("unauthorized user");
+  }
+
+  jwt.verify(token, process.env.USER_SECRET_KEY, (err, decoded) => {
+    if (err) {
+      return res.status(401).send("unauthorized user");
+    }
+
+    req.user = decoded;
+    next();
+  });
+};
 
 // mongodb stored
 
@@ -107,7 +127,10 @@ async function run() {
     });
 
     /* ======================= for Submitted  Collection =====================*/
-    app.post("/submitted", async (req, res) => {
+    app.post("/submitted", verifyUser, async (req, res) => {
+      if (req.user.email !== req.body.examinee.email) {
+        return res.status(403).send("forbidden User");
+      }
       const assignment = req.body;
       const result = await submittedCollection.insertOne(assignment);
       res.send(result);
@@ -120,15 +143,25 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/pending/:email", async (req, res) => {
+    app.get("/pending/:email", verifyUser, async (req, res) => {
+      if (req.user.email !== req.params.email) {
+        return res.status(403).send("forbidden User");
+      }
+
       const email = req.params.email;
+
       const query = { "examinee.email": email };
       const result = await submittedCollection.find(query).toArray();
 
       res.send(result);
     });
 
-    app.put("/marked/:id", async (req, res) => {
+    app.put("/marked/:id", verifyUser, async (req, res) => {
+      console.log(req.query.email);
+      if (req.user.email !== req.body.examiner) {
+        return res.status(403).send("forbidden User");
+      }
+
       const id = req.params.id;
       const item = req.body;
       const query = { _id: new ObjectId(id) };
@@ -143,6 +176,26 @@ async function run() {
 
       const result = await submittedCollection.updateOne(query, updateDoc, options);
       res.send(result);
+    });
+
+    /*=================JWT ==================== */
+
+    app.post("/jwt", (req, res) => {
+      const user = req.body;
+      const token = jwt.sign(user, process.env.USER_SECRET_KEY, { expiresIn: "1d" });
+
+      res
+        .cookie("token", token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+        })
+        .send({ success: true });
+    });
+
+    app.post("/logout", (req, res) => {
+      const user = req.body;
+      res.clearCookie("token", { maxAge: 0 }).send({ success: true });
     });
 
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
