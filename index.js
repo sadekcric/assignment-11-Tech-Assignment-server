@@ -57,7 +57,11 @@ async function run() {
     const assignmentCollection = client.db("Tech-Assignment").collection("assignments");
     const submittedCollection = client.db("Tech-Assignment").collection("submitted");
 
-    app.post("/assignments", async (req, res) => {
+    app.post("/assignments", verifyUser, async (req, res) => {
+      if (req.user.email !== req.body.publisher.email) {
+        return res.status(403).send("forbidden User");
+      }
+
       const assignment = req.body;
       const result = await assignmentCollection.insertOne(assignment);
       res.send(result);
