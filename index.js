@@ -71,9 +71,16 @@ async function run() {
       const pages = parseInt(req.query.pages);
       const size = parseInt(req.query.size);
       const difficultyLevel = req.query.level;
+      const filter = req.query;
 
       let query = {};
-      if (difficultyLevel) query = { level: difficultyLevel };
+      if (difficultyLevel) {
+        query = { level: difficultyLevel };
+      }
+
+      if (filter.search) {
+        query = { title: { $regex: filter.search, $options: "i" } };
+      }
 
       const result = await assignmentCollection
         .find(query)
